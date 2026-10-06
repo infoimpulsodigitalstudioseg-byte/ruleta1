@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ruleta de cronopios y famas</title>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Karla:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F5FA;--card:#fff;--ink:#1F2A44;--mut:#5b6580;--line:#d9deea;--acc:#3B4A8C;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a2c;--card:#1d2540;--ink:#eef1fa;--mut:#a3adc9;--line:#323c5e;--acc:#a9b6f5}}
+:root[data-theme="dark"]{--bg:#141a2c;--card:#1d2540;--ink:#eef1fa;--mut:#a3adc9;--line:#323c5e;--acc:#a9b6f5}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Karla,system-ui,sans-serif}
+main{max-width:920px;margin:0 auto;padding:24px 18px 48px}
+h1,h2{font-family:"Young Serif",Georgia,serif;font-weight:400;line-height:1.15;margin:0}
+h1{font-size:clamp(28px,6vw,42px)}
+.sub{color:var(--mut);margin:8px 0 22px;max-width:60ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+@media(min-width:800px){.grid{grid-template-columns:380px minmax(0,1fr);align-items:start}}
+.wheelbox{position:relative;width:100%;max-width:380px;margin:0 auto}
+.pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:32px solid var(--ink);z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+canvas{width:100%;height:auto;display:block;transition:transform 4.2s cubic-bezier(.12,.6,.1,1)}
+@media(prefers-reduced-motion:reduce){canvas{transition-duration:.01s}}
+.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:92px;height:92px;border-radius:50%;border:4px solid var(--bg);background:var(--ink);color:var(--bg);font:700 16px Karla,sans-serif;cursor:pointer}
+.hub:disabled{opacity:.6;cursor:default}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.tema{display:inline-block;font-size:14px;font-weight:700;color:#fff;padding:2px 10px;border-radius:99px;margin-bottom:10px}
+.card h2{font-size:26px;margin-bottom:12px}
+blockquote{margin:0 0 14px;padding-left:14px;border-left:4px solid var(--c,var(--acc));font-style:italic}
+.cons b{color:var(--acc)}
+.empty{color:var(--mut)}
+.timer{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+.time{font:400 34px "Young Serif",Georgia,serif;min-width:104px}
+.btn{font:700 15px Karla,sans-serif;padding:8px 14px;border-radius:8px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.btn.p{background:var(--ink);color:var(--bg)}
+.done{font-size:15px;color:var(--mut);margin-top:12px}
+h2.pl{font-size:22px;margin:32px 0 12px}
+.plan{display:flex;flex-direction:column;gap:6px}
+.blk{display:grid;grid-template-columns:70px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--k);border-radius:8px;padding:10px 14px}
+.blk b{font-family:"Young Serif",Georgia,serif;font-weight:400}
+.blk span{color:var(--mut);font-size:15px}
+.rule{margin-top:14px;font-size:15px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<h1>Ruleta de cronopios y famas</h1>
+<p class="sub">Girá la ruleta para que el azar elija la actividad de escritura. En 90 minutos caben dos vueltas.</p>
+
+<div class="grid">
+  <div>
+    <div class="wheelbox">
+      <div class="pointer"></div>
+      <canvas id="w" width="760" height="760" aria-label="Ruleta con seis actividades"></canvas>
+      <button class="hub" id="spin">Girar</button>
+    </div>
+    <p class="done" id="hist" style="text-align:center"></p>
+  </div>
+
+  <div class="card" id="res" aria-live="polite">
+    <p class="empty">Todavía no salió ninguna actividad. Tocá <b>Girar</b> para empezar la primera vuelta.</p>
+  </div>
+</div>
+
+<h2 class="pl">Los 90 minutos del taller</h2>
+<div class="plan">
+  <div class="blk" style="--k:#E8B33A"><b>10 min</b><div>Lectura en voz alta<br><span>Un poema de Cortázar, Neruda o Szymborska para entrar en clima.</span></div></div>
+  <div class="blk" style="--k:#2A9D8F"><b>35 min</b><div>Primera vuelta<br><span>5 min ruleta y consigna, 20 min escritura, 10 min lectura en voz alta.</span></div></div>
+  <div class="blk" style="--k:#E76F6F"><b>35 min</b><div>Segunda vuelta<br><span>Misma dinámica con otra actividad de la ruleta.</span></div></div>
+  <div class="blk" style="--k:#8E7DBE"><b>10 min</b><div>Cierre<br><span>Elegir un título cortazariano para la antología del grupo, por ejemplo "Historias de gente que casi sabía escribir".</span></div></div>
+</div>
+<p class="rule">Regla cronopio: no se corrige mientras se escribe, solo después.</p>
+</main>
+
+<script>
+const A=[
+{n:"El árbol",t:"Naturaleza",c:"#2A9D8F",q:"Un cronopio se detuvo frente a un árbol y le preguntó cómo se llamaba. El árbol no contestó, pero el cronopio escribió en su cuaderno: «Me dijo que se llama Martes». Un fama, que pasaba, anotó: «Fresno, altura aproximada 8 metros». Los dos quedaron satisfechos.",
+ s:"Elegí un elemento de la naturaleza y escribí dos textos breves sobre él: uno como cronopio (nombre inventado y una voz) y otro como fama (medidas, datos, clasificaciones). Después uní ambos en un solo poema."},
+{n:"Instrucciones para querer",t:"Amor",c:"#E76F6F",q:"Para querer a alguien hay que empezar por los detalles: la forma de doblar el diario, el ruido de las llaves en la puerta. Un fama exigiría un manual. Un cronopio, en cambio, simplemente deja la ventana abierta.",
+ s:"Escribí unas «Instrucciones para...» que traten sobre amar, extrañar o perdonar. Usá el tono serio de un manual, pero llenalo de imágenes absurdas y tiernas."},
+{n:"La esperanza y la llave",t:"Libertad",c:"#E8B33A",q:"Una esperanza estaba sentada frente a una puerta cerrada. Pasó un fama y le dijo: «Debe existir un procedimiento». Pasó un cronopio y le dijo: «Probá a golpear con la canción que más te gusta». La esperanza sonrió, porque la puerta nunca había estado con llave.",
+ s:"Describí una «puerta» de tu vida que creíste cerrada. Escribí el poema como una conversación entre una esperanza, un fama y un cronopio, cada uno con su consejo."},
+{n:"Conservación de los recuerdos",t:"Memoria y tiempo",c:"#8E7DBE",q:"Los famas guardan los recuerdos en frascos etiquetados con fecha. Los cronopios los dejan sueltos por la casa y a veces uno se les posa en el hombro, un jueves cualquiera.",
+ s:"Escribí un poema sobre un recuerdo que «se te posó en el hombro» de forma inesperada. Incluí un objeto cotidiano que lo despierte: un perfume, una canción, una taza."},
+{n:"Fama que quiso ser inspirador",t:"Superación",c:"#5B8DEF",q:"Un fama decidió escribir un poema motivacional. Redactó un esquema, tres objetivos y un cronograma. El poema salió impecable y no conmovió a nadie. Un cronopio lo arrugó, lo tiró al aire y de la bola de papel salió un verso torcido que hizo llorar a media plaza.",
+ s:"Escribí un poema de aliento sobre algo que te costó superar, primero de forma «correcta» y ordenada, y luego reescribilo rompiendo las reglas hasta que suene humano."},
+{n:"Los cronopios en la ciudad",t:"Lo cotidiano",c:"#6BA368",q:"Un cronopio viaja en colectivo y le regala versos a cada parada. Los famas revisan el boleto.",
+ s:"Observá una escena cotidiana (la cola del banco, el subte, un bar) y transformala en un poema, tratando a los personajes como cronopios, famas o esperanzas."}
+];
+const N=A.length,seg=360/N,cv=document.getElementById('w'),g=cv.getContext('2d');
+function draw(){const S=760,r=S/2;g.clearRect(0,0,S,S);
+ A.forEach((a,i)=>{const s=(-90+i*seg)*Math.PI/180,e=(-90+(i+1)*seg)*Math.PI/180;
+  g.beginPath();g.moveTo(r,r);g.arc(r,r,r-6,s,e);g.closePath();g.fillStyle=a.c;g.fill();
+  g.lineWidth=5;g.strokeStyle='#fff';g.stroke();
+  g.save();g.translate(r,r);g.rotate((s+e)/2);g.textAlign='right';g.fillStyle='#fff';
+  g.font='700 30px Karla,sans-serif';g.shadowColor='rgba(0,0,0,.45)';g.shadowBlur=4;
+  g.fillText(a.t,r-40,10);g.restore();});}
+draw();document.fonts&&document.fonts.ready.then(draw);
+
+let rot=0,busy=false,used=[];
+const spin=document.getElementById('spin'),res=document.getElementById('res'),hist=document.getElementById('hist');
+let tid=null,left=1200;
+spin.onclick=()=>{if(busy)return;
+ if(used.length===N)used=[];
+ const free=A.map((_,i)=>i).filter(i=>!used.includes(i));
+ const k=free[Math.floor(Math.random()*free.length)];
+ const target=(360-(k*seg+seg/2)+(Math.random()-.5)*seg*.6+720)%360;
+ const cur=((rot%360)+360)%360;
+ rot+=((target-cur+360)%360)+360*5;
+ busy=true;spin.disabled=true;cv.style.transform='rotate('+rot+'deg)';
+ setTimeout(()=>{busy=false;spin.disabled=false;used.push(k);show(k);},
+  matchMedia('(prefers-reduced-motion:reduce)').matches?50:4300);};
+
+function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function show(k){const a=A[k];clearInterval(tid);tid=null;left=1200;
+ res.innerHTML=`<span class="tema" style="background:${a.c}">${a.t}</span><h2>${a.n}</h2>
+ <blockquote style="--c:${a.c}">${a.q}</blockquote><p class="cons"><b>Consigna:</b> ${a.s}</p>
+ <div class="timer"><div class="time" id="tm">${fmt(left)}</div>
+ <button class="btn p" id="go">Empezar escritura</button><button class="btn" id="rs">Reiniciar</button></div>
+ <p class="done">Escritura: 20 min. Después, 10 min para leer en voz alta.</p>`;
+ document.getElementById('go').onclick=e=>{const b=e.target;
+  if(tid){clearInterval(tid);tid=null;b.textContent='Seguir';return;}
+  b.textContent='Pausar';
+  tid=setInterval(()=>{left--;document.getElementById('tm').textContent=fmt(left);
+   if(left<=0){clearInterval(tid);tid=null;b.textContent='Empezar escritura';
+    document.getElementById('tm').textContent='¡Tiempo!';left=1200;}},1000);};
+ document.getElementById('rs').onclick=()=>show(k);
+ hist.textContent='Vuelta '+Math.min(used.length,N)+': '+used.map(i=>A[i].n).join(' → ');
+ if(matchMedia('(max-width:799px)').matches)res.scrollIntoView({behavior:'smooth',block:'start'});}
+</script>
+</body>
+</html>
